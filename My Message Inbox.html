@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Message Inbox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fff4ee; --surface:#ffffff; --ink:#2a1420; --muted:#7d6472; --line:#f0d9d0;
+  --accent:#ff3d7f; --accent-ink:#ffffff; --accent2:#ff8a3d; --drop:#ffe6df;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1a0f17; --surface:#2a1823; --ink:#fbeaf1; --muted:#b39aa8; --line:#43283a;
+    --accent:#ff5c93; --accent-ink:#2a1420; --accent2:#ff9a55; --drop:#2f1a28;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1a0f17; --surface:#2a1823; --ink:#fbeaf1; --muted:#b39aa8; --line:#43283a;
+  --accent:#ff5c93; --accent-ink:#2a1420; --accent2:#ff9a55; --drop:#2f1a28;
+  color-scheme: dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 80px}
+header{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+.logo{width:72px;height:72px;border-radius:20px;border:0;background:var(--surface);display:grid;place-items:center;overflow:hidden;cursor:pointer;flex:none;color:var(--muted);font-size:12px;text-align:center;line-height:1.2;padding:0}
+.logo img{width:100%;height:100%;object-fit:cover;display:block}
+.logo:focus-visible,button:focus-visible,.drop:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1{margin:0;font-size:clamp(28px,6vw,44px);font-weight:800;letter-spacing:-.02em;line-height:1.05}
+.sub{margin:4px 0 0;color:var(--muted);font-size:15px}
+.drop{display:block;width:100%;border:2px dashed var(--accent);background:var(--drop);border-radius:24px;padding:36px 20px;text-align:center;cursor:pointer;color:var(--ink);font:inherit;transition:transform .15s,background .15s}
+.drop.over{transform:scale(1.01);background:var(--surface)}
+.drop b{display:block;font-size:clamp(20px,4vw,28px);font-weight:800;letter-spacing:-.01em}
+.drop span{display:block;color:var(--muted);margin-top:6px;font-size:15px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:32px 0 16px;flex-wrap:wrap}
+.tabs{display:flex;gap:8px}
+.tab{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 16px;border-radius:999px;font:inherit;font-weight:600;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tab small{opacity:.8;margin-left:4px;font-weight:600}
+.clear{border:0;background:none;color:var(--muted);font:inherit;text-decoration:underline;cursor:pointer;padding:8px}
+.grid{columns:2 300px;column-gap:16px}
+.card{break-inside:avoid;background:var(--surface);border:1.5px solid var(--line);border-radius:20px;overflow:hidden;margin:0 0 16px;display:block}
+.card.fresh{animation:pop .45s ease-out}
+@keyframes pop{from{transform:scale(.94);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion: reduce){.card.fresh{animation:none}.drop{transition:none}.heart.beat svg{animation:none!important}}
+.card img{width:100%;display:block;cursor:zoom-in;background:var(--drop)}
+.meta{display:flex;align-items:center;justify-content:space-between;padding:10px 12px}
+.time{font-size:13px;color:var(--muted)}
+.acts{display:flex;gap:4px}
+.ib{display:inline-flex;align-items:center;gap:6px;border:0;background:none;color:var(--muted);font:inherit;font-weight:600;cursor:pointer;padding:8px 10px;border-radius:999px}
+.ib:hover{background:var(--drop)}
+.heart.on{color:var(--accent)}
+.heart.on svg{fill:var(--accent)}
+.heart.beat svg{animation:beat .35s ease-out}
+@keyframes beat{50%{transform:scale(1.35)}}
+svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.empty{text-align:center;color:var(--muted);padding:48px 16px;border:1.5px dashed var(--line);border-radius:20px}
+.empty b{display:block;color:var(--ink);font-size:18px;margin-bottom:4px}
+#lb{position:fixed;inset:0;background:rgba(20,8,16,.88);display:none;align-items:center;justify-content:center;padding:20px;z-index:50;cursor:zoom-out}
+#lb.show{display:flex}
+#lb img{max-width:100%;max-height:100%;border-radius:12px}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,40px);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:999px;font-weight:600;opacity:0;transition:.25s;z-index:60;pointer-events:none;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <button class="logo" id="logoBtn" type="button" aria-label="Change your logo"><svg viewBox="0 0 512 512" width="72" height="72" aria-hidden="true" style="width:100%;height:100%;stroke:none"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff3d7f"/><stop offset="1" stop-color="#ff8a3d"/></linearGradient></defs><rect width="512" height="512" rx="120" fill="url(#lg)"/><path d="M256 108c-84 0-152 54-152 122 0 40 24 76 62 99-3 22-14 42-30 58 34-2 62-14 82-30 12 2 25 3 38 3 84 0 152-54 152-122S340 108 256 108z" fill="#fff"/><g transform="translate(256 226) scale(6) translate(-12 -12)"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z" fill="url(#lg)"/></g></svg></button>
+    <div>
+      <h1>My Inbox</h1>
+      <p class="sub">Paste your NGL messages as pictures and they land here.</p>
+    </div>
+  </header>
+
+  <button class="drop" id="drop" type="button">
+    <b>Paste a screenshot (Ctrl+V or ⌘V)</b>
+    <span>or drop pictures here, or tap to choose from your device</span>
+  </button>
+
+  <div class="bar">
+    <div class="tabs">
+      <button class="tab" id="tAll" type="button" aria-pressed="true">Inbox <small id="nAll">0</small></button>
+      <button class="tab" id="tLiked" type="button" aria-pressed="false">Liked <small id="nLiked">0</small></button>
+    </div>
+    <button class="clear" id="clear" type="button">Delete all</button>
+  </div>
+
+  <div id="list" class="grid"></div>
+</div>
+
+<input type="file" id="file" accept="image/*" multiple hidden>
+<input type="file" id="logoFile" accept="image/*" hidden>
+<div id="lb"><img alt="Message enlarged" id="lbImg"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  var DB='ngl-inbox', MSG='messages', META='meta';
+  var db=null, mem=[], memLogo=null, filter='all', freshId=null;
+
+  function openDB(){
+    return new Promise(function(res,rej){
+      try{
+        var r=indexedDB.open(DB,1);
+        r.onupgradeneeded=function(){
+          r.result.createObjectStore(MSG,{keyPath:'id'});
+          r.result.createObjectStore(META);
+        };
+        r.onsuccess=function(){res(r.result)};
+        r.onerror=function(){rej(r.error)};
+      }catch(e){rej(e)}
+    });
+  }
+  function tx(store,mode,fn){
+    return new Promise(function(res,rej){
+      var t=db.transaction(store,mode), s=t.objectStore(store), q=fn(s);
+      t.oncomplete=function(){res(q&&q.result)};
+      t.onerror=function(){rej(t.error)};
+    });
+  }
+  async function loadAll(){
+    if(!db) return mem.slice();
+    try{return await tx(MSG,'readonly',function(s){return s.getAll()})||[]}catch(e){return mem.slice()}
+  }
+  async function save(m){
+    if(db){try{await tx(MSG,'readwrite',function(s){return s.put(m)});return}catch(e){}}
+    var i=mem.findIndex(function(x){return x.id===m.id}); if(i<0) mem.push(m); else mem[i]=m;
+  }
+  async function remove(id){
+    if(db){try{await tx(MSG,'readwrite',function(s){return s.delete(id)})}catch(e){}}
+    mem=mem.filter(function(x){return x.id!==id});
+  }
+  async function wipe(){
+    if(db){try{await tx(MSG,'readwrite',function(s){return s.clear()})}catch(e){}}
+    mem=[];
+  }
+
+  var $=function(id){return document.getElementById(id)};
+  var list=$('list'), toastEl=$('toast'), tt;
+  function toast(t){toastEl.textContent=t;toastEl.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){toastEl.classList.remove('show')},2200)}
+
+  function toData(file){
+    return new Promise(function(res){
+      var img=new Image(), url=URL.createObjectURL(file);
+      img.onload=function(){
+        var s=Math.min(1,1400/Math.max(img.width,img.height));
+        var c=document.createElement('canvas');
+        c.width=Math.round(img.width*s); c.height=Math.round(img.height*s);
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        URL.revokeObjectURL(url);
+        res(c.toDataURL('image/webp',0.9));
+      };
+      img.onerror=function(){URL.revokeObjectURL(url);res(null)};
+      img.src=url;
+    });
+  }
+
+  async function addFiles(files){
+    var n=0;
+    for(var i=0;i<files.length;i++){
+      var f=files[i];
+      if(!f||f.type.indexOf('image/')!==0) continue;
+      var data=await toData(f);
+      if(!data) continue;
+      var m={id:Date.now()+'-'+Math.random().toString(36).slice(2,7),img:data,liked:false,at:Date.now()+i};
+      await save(m); freshId=m.id; n++;
+    }
+    if(n){toast(n===1?'Message sent to your inbox':n+' messages sent to your inbox');setFilter('all',true)}
+    else toast('No picture found. Copy a screenshot and paste again.');
+  }
+
+  function fmt(t){
+    var d=new Date(t);
+    return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+', '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+  }
+  var HEART='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>';
+  var TRASH='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>';
+
+  async function render(){
+    var all=(await loadAll()).sort(function(a,b){return b.at-a.at});
+    var liked=all.filter(function(m){return m.liked});
+    $('nAll').textContent=all.length; $('nLiked').textContent=liked.length;
+    var show=filter==='liked'?liked:all;
+    list.innerHTML='';
+    if(!show.length){
+      var e=document.createElement('div'); e.className='empty';
+      e.innerHTML=filter==='liked'
+        ?'<b>No liked messages yet</b>Tap the heart on a message to keep it here.'
+        :'<b>Your inbox is empty</b>Paste your first NGL screenshot above.';
+      list.style.columns='auto'; list.appendChild(e); return;
+    }
+    list.style.columns='';
+    show.forEach(function(m){
+      var c=document.createElement('article'); c.className='card'+(m.id===freshId?' fresh':'');
+      var im=document.createElement('img'); im.src=m.img; im.alt='NGL message from '+fmt(m.at);
+      im.addEventListener('click',function(){$('lbImg').src=m.img;$('lb').classList.add('show')});
+      var meta=document.createElement('div'); meta.className='meta';
+      var tm=document.createElement('span'); tm.className='time'; tm.textContent=fmt(m.at);
+      var acts=document.createElement('div'); acts.className='acts';
+      var like=document.createElement('button'); like.type='button';
+      like.className='ib heart'+(m.liked?' on':''); like.setAttribute('aria-pressed',m.liked);
+      like.innerHTML=HEART+'<span>'+(m.liked?'Liked':'Like')+'</span>';
+      like.addEventListener('click',async function(){
+        m.liked=!m.liked; await save(m);
+        like.classList.toggle('on',m.liked); like.classList.add('beat');
+        like.setAttribute('aria-pressed',m.liked);
+        like.querySelector('span').textContent=m.liked?'Liked':'Like';
+        var all2=await loadAll(); $('nLiked').textContent=all2.filter(function(x){return x.liked}).length;
+        if(filter==='liked'&&!m.liked) render();
+      });
+      var del=document.createElement('button'); del.type='button'; del.className='ib'; del.setAttribute('aria-label','Delete message'); del.innerHTML=TRASH;
+      del.addEventListener('click',async function(){await remove(m.id);toast('Message deleted');render()});
+      acts.appendChild(like); acts.appendChild(del);
+      meta.appendChild(tm); meta.appendChild(acts);
+      c.appendChild(im); c.appendChild(meta); list.appendChild(c);
+    });
+    freshId=null;
+  }
+
+  function setFilter(f,skip){
+    filter=f;
+    $('tAll').setAttribute('aria-pressed',f==='all');
+    $('tLiked').setAttribute('aria-pressed',f==='liked');
+    render();
+  }
+  $('tAll').onclick=function(){setFilter('all')};
+  $('tLiked').onclick=function(){setFilter('liked')};
+  $('clear').onclick=async function(){
+    var all=await loadAll(); if(!all.length) return;
+    if(confirm('Delete all '+all.length+' messages? This cannot be undone.')){await wipe();toast('Inbox cleared');render()}
+  };
+
+  // paste, drop, choose
+  document.addEventListener('paste',function(e){
+    var items=(e.clipboardData&&e.clipboardData.items)||[], files=[];
+    for(var i=0;i<items.length;i++){ if(items[i].type.indexOf('image/')===0){var f=items[i].getAsFile(); if(f) files.push(f)} }
+    if(files.length){e.preventDefault();addFiles(files)}
+  });
+  var drop=$('drop');
+  drop.onclick=function(){$('file').click()};
+  $('file').onchange=function(e){addFiles(Array.from(e.target.files));e.target.value=''};
+  ['dragenter','dragover'].forEach(function(ev){document.addEventListener(ev,function(e){e.preventDefault();drop.classList.add('over')})});
+  ['dragleave','drop'].forEach(function(ev){document.addEventListener(ev,function(e){e.preventDefault();drop.classList.remove('over')})});
+  document.addEventListener('drop',function(e){if(e.dataTransfer&&e.dataTransfer.files.length) addFiles(Array.from(e.dataTransfer.files))});
+
+  // lightbox
+  $('lb').onclick=function(){$('lb').classList.remove('show')};
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')$('lb').classList.remove('show')});
+
+  // logo slot
+  function showLogo(src){
+    var b=$('logoBtn'); b.innerHTML='';
+    var i=document.createElement('img'); i.src=src; i.alt='Logo'; b.appendChild(i);
+    b.style.borderStyle='solid';
+  }
+  $('logoBtn').onclick=function(){$('logoFile').click()};
+  $('logoFile').onchange=async function(e){
+    var f=e.target.files[0]; if(!f) return;
+    var data=await toData(f); if(!data) return;
+    showLogo(data); memLogo=data;
+    if(db){try{await tx(META,'readwrite',function(s){return s.put(data,'logo')})}catch(err){}}
+    e.target.value='';
+  };
+
+  (async function init(){
+    try{db=await openDB()}catch(e){db=null}
+    if(db){try{var l=await tx(META,'readonly',function(s){return s.get('logo')}); if(l) showLogo(l)}catch(e){}}
+    render();
+  })();
+})();
+</script>
+</body>
+</html>
